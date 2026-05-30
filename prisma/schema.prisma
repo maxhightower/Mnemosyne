@@ -1,0 +1,179 @@
+// Project Mnemosyne — data model for the D&D visual-storytelling MVP.
+//
+// Notes on field encoding:
+//  - SQLite has no native array/JSON columns we want to depend on across
+//    providers, so list-like fields (signature items, character id lists,
+//    mechanical results, continuity notes) are stored as JSON-encoded strings.
+//    Helpers in src/lib/json.ts read/write them. This keeps the schema portable
+//    to PostgreSQL later with minimal change.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id              String   @id @default(cuid())
+  name            String
+  genre           String   @default("")
+  tone            String   @default("")
+  visualStyle     String   @default("")
+  contentRating   String   @default("")
+  styleReferences String   @default("") // freeform text references
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  characters       Character[]
+  locations        Location[]
+  scenes           Scene[]
+  events           SessionEvent[]
+  prompts          VisualPrompt[]
+  visualReferences VisualReference[]
+  corrections      Correction[]
+}
+
+model Character {
+  id                   String   @id @default(cuid())
+  campaignId           String
+  campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name                 String
+  type                 String   @default("player character") // player character | NPC | monster | villain | companion
+  species              String   @default("")
+  classRole            String   @default("")
+  physicalAppearance   String   @default("")
+  clothingArmor        String   @default("")
+  signatureItems       String   @default("[]") // JSON string[]
+  personalityVisualCues String  @default("")
+  currentCondition     String   @default("")
+  secrets              String   @default("") // hidden traits, DM only
+  publicDescription    String   @default("")
+  privateNotes         String   @default("") // DM-only
+  canonicalImageRefs   String   @default("[]") // JSON string[] of urls/notes
+  active               Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([campaignId])
+}
+
+model Location {
+  id                 String   @id @default(cuid())
+  campaignId         String
+  campaign           Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name               String
+  type               String   @default("")
+  description        String   @default("")
+  mood               String   @default("")
+  landmarks          String   @default("") // important landmarks
+  lighting           String   @default("")
+  weather            String   @default("") // weather / environment
+  hiddenFeatures     String   @default("") // DM-only
+  publicDescription  String   @default("")
+  privateNotes       String   @default("") // DM-only
+  canonicalImageRefs String   @default("[]") // JSON string[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  scenes Scene[]
+
+  @@index([campaignId])
+}
+
+model Scene {
+  id               String    @id @default(cuid())
+  campaignId       String
+  campaign         Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  locationId       String?
+  location         Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  title            String    @default("Current Scene")
+  presentCharacterIds String @default("[]") // JSON string[] of Character ids
+  importantObjects String    @default("")
+  mood             String    @default("")
+  lighting         String    @default("")
+  cameraPreference String    @default("") // e.g. wide shot, close-up
+  visibleAction    String    @default("")
+  hiddenInformation String   @default("") // DM-only, never rendered unless revealed
+  revealHidden     Boolean   @default(false) // DM toggle: include hidden info in prompt
+  notes            String    @default("")
+  isActive         Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  events  SessionEvent[]
+  prompts VisualPrompt[]
+
+  @@index([campaignId])
+}
+
+model SessionEvent {
+  id                String   @id @default(cuid())
+  campaignId        String
+  campaign          Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sceneId           String?
+  scene             Scene?   @relation(fields: [sceneId], references: [id], onDelete: SetNull)
+  timestamp         DateTime @default(now())
+  speaker           String   @default("")
+  eventType         String   @default("DM narration")
+  rawText           String   @default("")
+  structuredSummary String   @default("")
+  charactersInvolved String  @default("[]") // JSON string[]
+  locationInvolved  String   @default("")
+  mechanicalResult  String   @default("") // JSON object string (roll/result/damage...)
+  visualImportance  Int      @default(3) // 1..5
+  spoilerSafe       Boolean  @default(true)
+  dmApproved        Boolean  @default(false)
+
+  @@index([campaignId])
+  @@index([sceneId])
+}
+
+model VisualPrompt {
+  id              String   @id @default(cuid())
+  campaignId      String
+  campaign        Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sceneId         String?
+  scene           Scene?   @relation(fields: [sceneId], references: [id], onDelete: SetNull)
+  shortPrompt     String   @default("")
+  expandedPrompt  String   @default("")
+  negativePrompt  String   @default("")
+  continuityNotes String   @default("[]") // JSON string[]
+  spoilerWarnings String   @default("[]") // JSON string[]
+  source          String   @default("deterministic") // deterministic | ai
+  createdAt       DateTime @default(now())
+
+  @@index([campaignId])
+}
+
+model VisualReference {
+  id                String   @id @default(cuid())
+  campaignId        String
+  campaign          Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sceneId           String?
+  promptText        String   @default("")
+  imageUrl          String   @default("")
+  relatedCharacters String   @default("[]") // JSON string[]
+  relatedLocation   String   @default("")
+  approvedByDm      Boolean  @default(true)
+  notes             String   @default("")
+  createdAt         DateTime @default(now())
+
+  @@index([campaignId])
+}
+
+model Correction {
+  id             String   @id @default(cuid())
+  campaignId     String
+  campaign       Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  correctionType String   @default("general") // character | location | scene | style | general
+  target         String   @default("") // e.g. character/location name
+  correction     String   @default("")
+  priority       String   @default("medium") // low | medium | high
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  @@index([campaignId])
+}
