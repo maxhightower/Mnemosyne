@@ -21,6 +21,10 @@ next-env.d.ts
 .env
 .env*.local
 
+# uploaded reference art (kept out of git; the directory is tracked via .gitkeep)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # misc
 .DS_Store
 *.pem

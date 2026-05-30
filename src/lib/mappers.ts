@@ -43,6 +43,7 @@ export function toCharacterState(c: Character): CharacterState {
     secrets: c.secrets,
     publicDescription: c.publicDescription,
     privateNotes: c.privateNotes,
+    canonicalImageRefs: parseList(c.canonicalImageRefs),
     active: c.active,
   };
 }

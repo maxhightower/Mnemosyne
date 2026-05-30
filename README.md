@@ -24,6 +24,10 @@ polished **image-generation prompts** the DM can paste into any image model.
   exclusions.
 - **Campaign memory model**: campaigns, characters, NPCs/monsters, locations, the
   current scene, a session event log, generated prompts, and canonical references.
+- **Character reference art**: attach canonical art to a character by uploading an
+  image or pasting a URL. When present, prompts gain a *"must match the provided
+  canonical reference art"* continuity note, and the URLs are carried to the AI
+  path — readying the seam for future img2img reference conditioning.
 - Optional, drop-in **AI** (OpenAI-compatible) for event structuring and richer
   prompts, and a stubbed **image generation** seam for later.
 
@@ -187,8 +191,11 @@ These are intentionally **out of scope** for the MVP and marked in code:
 - **Image generation** — `src/lib/imageGen.ts` is the seam. Wire a provider
   (OpenAI Images, Stability, Replicate, local ComfyUI/A1111), persist the image,
   and store the URL on `VisualReference.imageUrl`. Set `IMAGE_GEN_ENABLED=true`.
-  - *Consistency*: feed canonical image references back as reference/init images
-    so characters and locations stay visually stable across scenes.
+  - *Consistency*: a character's **reference art** (`Character.canonicalImageRefs`,
+    editable in the Characters view via upload or URL) is the seam for this — feed
+    those images back as reference/init images so characters stay visually stable
+    across scenes. Uploaded files are stored under `public/uploads/` (git-ignored;
+    lost on container reset — paste a hosted URL for durable references).
 - **Live speech transcription + speaker diarization** — auto-create session
   events from audio (currently events are added manually).
 - **Discord bot** input and a **Foundry VTT** module / **Roll20** / **D&D Beyond**

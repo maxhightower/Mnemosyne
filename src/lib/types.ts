@@ -26,6 +26,7 @@ export interface CharacterState {
   secrets: string;
   publicDescription: string;
   privateNotes: string;
+  canonicalImageRefs: string[];
   active: boolean;
 }
 

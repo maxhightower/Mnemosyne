@@ -7,8 +7,15 @@ import type { CharacterDTO } from "@/lib/dto";
 import { CHARACTER_TYPES } from "@/lib/dto";
 import { parseList } from "@/lib/json";
 import { Field, TextInput, TextArea, Select, Checkbox, SpoilerBadge } from "@/components/forms";
+import ImageRefs from "@/components/ImageRefs";
 
-type Draft = Partial<CharacterDTO> & { name: string };
+// In the editor, list fields are held in friendlier shapes than the DTO's JSON
+// strings: signatureItems as a comma string, canonicalImageRefs as an array.
+type Draft = Omit<Partial<CharacterDTO>, "signatureItems" | "canonicalImageRefs"> & {
+  name: string;
+  signatureItems?: string;
+  canonicalImageRefs?: string[];
+};
 
 const empty: Draft = {
   name: "",
@@ -23,6 +30,7 @@ const empty: Draft = {
   currentCondition: "",
   secrets: "",
   privateNotes: "",
+  canonicalImageRefs: [],
   active: true,
 };
 
@@ -31,7 +39,11 @@ export default function CharactersView({ core, campaignId, reloadCore }: SharedP
   const [busy, setBusy] = useState(false);
 
   function startEdit(c: CharacterDTO) {
-    setEditing({ ...c, signatureItems: parseList(c.signatureItems).join(", ") });
+    setEditing({
+      ...c,
+      signatureItems: parseList(c.signatureItems).join(", "),
+      canonicalImageRefs: parseList(c.canonicalImageRefs),
+    });
   }
 
   async function save() {
@@ -151,6 +163,18 @@ export default function CharactersView({ core, campaignId, reloadCore }: SharedP
             />
           </Field>
 
+          <Field
+            label="Reference art (canonical visual source)"
+            hint="Upload art or paste image URLs. When present, prompts add a note that the character must match this reference."
+          >
+            <ImageRefs
+              value={editing.canonicalImageRefs ?? []}
+              onChange={(next) =>
+                setEditing({ ...editing, canonicalImageRefs: next })
+              }
+            />
+          </Field>
+
           <div className="rounded-md border border-amber-900/40 bg-amber-950/10 p-3 space-y-3">
             <div className="flex items-center gap-2">
               <SpoilerBadge />
@@ -197,22 +221,37 @@ export default function CharactersView({ core, campaignId, reloadCore }: SharedP
         )}
         {core.characters.map((c) => (
           <div key={c.id} className="card">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-medium text-stone-100">{c.name}</span>
-                  <span className="pill">{c.type}</span>
-                  {!c.active && <span className="pill text-stone-500">inactive</span>}
-                  {(c.secrets || c.privateNotes) && <SpoilerBadge />}
-                </div>
-                <p className="mt-1 text-sm text-stone-400">
-                  {c.publicDescription || "No public description."}
-                </p>
-                {c.currentCondition && (
-                  <p className="mt-1 text-xs text-amber-300">
-                    Condition: {c.currentCondition}
-                  </p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                {parseList(c.canonicalImageRefs)[0] && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={parseList(c.canonicalImageRefs)[0]}
+                    alt={`${c.name} reference`}
+                    className="h-16 w-16 flex-shrink-0 rounded-md border border-ink-700 object-cover"
+                  />
                 )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-medium text-stone-100">{c.name}</span>
+                    <span className="pill">{c.type}</span>
+                    {!c.active && <span className="pill text-stone-500">inactive</span>}
+                    {parseList(c.canonicalImageRefs).length > 0 && (
+                      <span className="pill border-arcane-500/40 text-arcane-400">
+                        {parseList(c.canonicalImageRefs).length} ref
+                      </span>
+                    )}
+                    {(c.secrets || c.privateNotes) && <SpoilerBadge />}
+                  </div>
+                  <p className="mt-1 text-sm text-stone-400">
+                    {c.publicDescription || "No public description."}
+                  </p>
+                  {c.currentCondition && (
+                    <p className="mt-1 text-xs text-amber-300">
+                      Condition: {c.currentCondition}
+                    </p>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2">
                 <button className="btn-secondary" onClick={() => startEdit(c)}>

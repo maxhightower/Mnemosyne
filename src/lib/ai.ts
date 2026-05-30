@@ -166,6 +166,7 @@ export async function generatePromptAI(
         clothingArmor: c.clothingArmor,
         signatureItems: c.signatureItems,
         currentCondition: c.currentCondition,
+        hasCanonicalReferenceArt: c.canonicalImageRefs.length > 0,
         ...(reveal ? { secrets: c.secrets } : {}),
       })),
     recentApprovedEvents: input.events

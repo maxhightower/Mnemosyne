@@ -186,6 +186,12 @@ export function generatePrompt(input: PromptGenInput): PromptGenOutput {
         `${c.name} has ${c.signatureItems.join(", ")}.`
       );
     }
+    // A canonical reference image anchors the character's look across renders.
+    if (c.canonicalImageRefs.length) {
+      continuityNotes.push(
+        `${c.name} must match the provided canonical reference art.`
+      );
+    }
   }
   if (locationName && locationDesc) {
     continuityNotes.push(`${locationName}: ${locationDesc}`);
