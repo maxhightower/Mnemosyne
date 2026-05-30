@@ -96,6 +96,8 @@ model Scene {
   lighting         String    @default("")
   cameraPreference String    @default("") // e.g. wide shot, close-up
   visibleAction    String    @default("")
+  referenceImages  String    @default("[]") // JSON string[]: composition/framing reference image urls
+  compositionNote  String    @default("") // framing & character-orientation guidance (DM- or vision-derived)
   hiddenInformation String   @default("") // DM-only, never rendered unless revealed
   revealHidden     Boolean   @default(false) // DM toggle: include hidden info in prompt
   notes            String    @default("")

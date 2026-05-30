@@ -109,6 +109,8 @@ async function main() {
       cameraPreference: "cinematic wide shot",
       visibleAction:
         "Thorne drives his glowing silver longsword into the skeletal knight while Mira readies a spell near the broken altar.",
+      compositionNote:
+        "low dramatic angle, Thorne lunging left-to-right center-frame, the skeletal knight reeling back to the right, Mira framed on the left near the altar, strong diagonal action lines",
       hiddenInformation:
         "A vampire spawn watches from the eastern sarcophagus, not yet revealed.",
       revealHidden: false,

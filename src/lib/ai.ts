@@ -152,6 +152,8 @@ export async function generatePromptAI(
       lighting: input.scene.lighting,
       cameraPreference: input.scene.cameraPreference,
       visibleAction: input.scene.visibleAction,
+      compositionNote: input.scene.compositionNote,
+      hasCompositionReferenceImage: input.scene.referenceImages.length > 0,
       ...(reveal ? { hiddenInformation: input.scene.hiddenInformation } : {}),
     },
     characters: input.characters

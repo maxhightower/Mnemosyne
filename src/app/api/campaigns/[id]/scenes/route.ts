@@ -32,6 +32,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       lighting: String(body.lighting ?? ""),
       cameraPreference: String(body.cameraPreference ?? ""),
       visibleAction: String(body.visibleAction ?? ""),
+      referenceImages: stringifyList(coerceList(body.referenceImages)),
+      compositionNote: String(body.compositionNote ?? ""),
       hiddenInformation: String(body.hiddenInformation ?? ""),
       revealHidden: Boolean(body.revealHidden ?? false),
       notes: String(body.notes ?? ""),

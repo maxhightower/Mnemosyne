@@ -54,6 +54,8 @@ export interface SceneState {
   lighting: string;
   cameraPreference: string;
   visibleAction: string;
+  referenceImages: string[];
+  compositionNote: string;
   hiddenInformation: string;
   revealHidden: boolean;
   notes: string;

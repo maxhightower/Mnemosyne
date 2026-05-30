@@ -75,6 +75,8 @@ export function toSceneState(s: Scene): SceneState {
     lighting: s.lighting,
     cameraPreference: s.cameraPreference,
     visibleAction: s.visibleAction,
+    referenceImages: parseList(s.referenceImages),
+    compositionNote: s.compositionNote,
     hiddenInformation: s.hiddenInformation,
     revealHidden: s.revealHidden,
     notes: s.notes,

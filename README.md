@@ -28,6 +28,11 @@ polished **image-generation prompts** the DM can paste into any image model.
   image or pasting a URL. When present, prompts gain a *"must match the provided
   canonical reference art"* continuity note, and the URLs are carried to the AI
   path — readying the seam for future img2img reference conditioning.
+- **Scene composition references**: attach a screenshot (e.g. a film/anime frame)
+  to the current scene to borrow framing & character orientation, plus a "framing
+  note" describing what to take. The note is injected into the prompt's
+  composition section; the image is stored for reference and future
+  img2img/ControlNet conditioning.
 - Optional, drop-in **AI** (OpenAI-compatible) for event structuring and richer
   prompts, and a stubbed **image generation** seam for later.
 

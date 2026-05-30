@@ -21,6 +21,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     "lighting",
     "cameraPreference",
     "visibleAction",
+    "compositionNote",
     "hiddenInformation",
     "notes",
   ];
@@ -31,6 +32,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     data.locationId = body.locationId ? String(body.locationId) : null;
   if (body.presentCharacterIds !== undefined)
     data.presentCharacterIds = stringifyList(coerceList(body.presentCharacterIds));
+  if (body.referenceImages !== undefined)
+    data.referenceImages = stringifyList(coerceList(body.referenceImages));
   if (body.revealHidden !== undefined) data.revealHidden = Boolean(body.revealHidden);
 
   // Activating this scene deactivates the others in the same campaign.

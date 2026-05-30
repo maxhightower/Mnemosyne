@@ -67,6 +67,8 @@ export interface SceneDTO {
   lighting: string;
   cameraPreference: string;
   visibleAction: string;
+  referenceImages: string; // JSON string[]
+  compositionNote: string;
   hiddenInformation: string;
   revealHidden: boolean;
   notes: string;

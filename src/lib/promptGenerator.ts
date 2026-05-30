@@ -163,6 +163,16 @@ export function generatePrompt(input: PromptGenInput): PromptGenOutput {
   const mood = scene?.mood?.trim() || location?.mood?.trim() || campaign.tone.trim();
   const lighting = scene?.lighting?.trim() || location?.lighting?.trim() || "";
   const importantObjects = scene?.importantObjects?.trim() || "";
+  // Composition / framing reference (e.g. borrowed from a screenshot). The note
+  // is what the generator can act on; the image itself is carried for the AI /
+  // future img2img path and as a continuity anchor.
+  const compositionNote = scene?.compositionNote?.trim() || "";
+  const hasSceneRefs = (scene?.referenceImages?.length ?? 0) > 0;
+  if (hasSceneRefs) {
+    continuityNotes.push(
+      "Framing and character orientation follow the provided scene reference image."
+    );
+  }
 
   // ----- Corrections -> continuity + negatives --------------------------
   const activeCorrections = corrections.filter((c) => c.active);
@@ -225,7 +235,7 @@ export function generatePrompt(input: PromptGenInput): PromptGenOutput {
   const primaryAction = sceneAction || eventPhrases[0] || "";
   if (primaryAction) sceneSentence.push(stripPeriod(primaryAction));
   if (sceneSentence.length) shortParts.push(joinSentences([sceneSentence.join(", ")]));
-  const shortTail = [lighting, mood && `${mood} mood`, camera]
+  const shortTail = [lighting, mood && `${mood} mood`, camera, compositionNote]
     .filter(Boolean)
     .map(stripPeriod)
     .join(", ");
@@ -265,7 +275,9 @@ export function generatePrompt(input: PromptGenInput): PromptGenOutput {
     lighting && `Lighting: ${lighting}`,
     mood && `Mood: ${mood}`,
     `Camera: ${camera}`,
-    "composition: dramatic and balanced, clear focal point",
+    compositionNote
+      ? `Composition: ${stripPeriod(compositionNote)}`
+      : "composition: dramatic and balanced, clear focal point",
   ]
     .filter(Boolean)
     .join(". ");

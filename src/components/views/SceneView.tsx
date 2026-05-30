@@ -7,6 +7,7 @@ import type { EventDTO, SceneDTO } from "@/lib/dto";
 import { parseList } from "@/lib/json";
 import { Field, TextInput, TextArea, Select, Checkbox, SpoilerBadge } from "@/components/forms";
 import GeneratePanel from "@/components/GeneratePanel";
+import ImageRefs from "@/components/ImageRefs";
 
 export default function SceneView(props: SharedProps) {
   const { core, campaignId, reloadCore, status, goTo } = props;
@@ -135,6 +136,8 @@ function SceneEditor({
     lighting: scene.lighting,
     cameraPreference: scene.cameraPreference,
     visibleAction: scene.visibleAction,
+    referenceImages: parseList(scene.referenceImages),
+    compositionNote: scene.compositionNote,
     hiddenInformation: scene.hiddenInformation,
     revealHidden: scene.revealHidden,
     notes: scene.notes,
@@ -231,6 +234,28 @@ function SceneEditor({
           <TextInput
             value={form.lighting}
             onChange={(e) => setForm({ ...form, lighting: e.target.value })}
+          />
+        </Field>
+      </div>
+
+      <div className="rounded-md border border-arcane-500/30 bg-arcane-500/5 p-3 space-y-3">
+        <Field
+          label="Composition reference images"
+          hint="Drop in a screenshot (e.g. a film/anime frame) to borrow framing & character orientation. Stored for reference and future img2img/ControlNet conditioning."
+        >
+          <ImageRefs
+            value={form.referenceImages}
+            onChange={(next) => setForm({ ...form, referenceImages: next })}
+          />
+        </Field>
+        <Field
+          label="Framing / composition note"
+          hint="What to borrow from the reference, in words — this is what the prompt actually uses (the offline generator can't see the image)."
+        >
+          <TextArea
+            value={form.compositionNote}
+            onChange={(e) => setForm({ ...form, compositionNote: e.target.value })}
+            placeholder="low dutch angle, two figures clashing center-frame, dynamic motion lines, subject lunging left-to-right"
           />
         </Field>
       </div>
