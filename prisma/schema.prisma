@@ -34,6 +34,21 @@ model Campaign {
   prompts          VisualPrompt[]
   visualReferences VisualReference[]
   corrections      Correction[]
+  graphs           Graph[]
+}
+
+// A saved node-graph (the in-app editor's document). nodes/edges are stored as a
+// single JSON blob in `data` ({ nodes: [...], edges: [...] } in React Flow shape).
+model Graph {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name       String   @default("Main graph")
+  data       String   @default("{\"nodes\":[],\"edges\":[]}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([campaignId])
 }
 
 model Character {

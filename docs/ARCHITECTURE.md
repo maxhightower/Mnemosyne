@@ -12,26 +12,36 @@
 | Decision | Choice | Consequence |
 | --- | --- | --- |
 | Hardware target | **Modest NVIDIA GPU (8–12GB)** | Design around **SDXL + LoRA**; SDXL-Turbo/LCM for speed; Flux & video are **out of initial scope** |
-| "ComfyUI-style" | **In-app node-graph editor** (first-class) | We build a node canvas + execution engine; see §3 for how we avoid rebuilding diffusion internals |
+| "ComfyUI-style" | **Full in-app node editor** (incl. diffusion-level nodes) | We own the canvas, graph, node set & executor end-to-end; the editor is 100% in-app |
+| Diffusion compute | **Pluggable GPU kernel** behind the Render node | JS can't run CUDA; diffusion nodes compile to a headless **ComfyUI** runtime (invisible to the user) — swappable for an own-bundled Python sidecar later |
 | Sequences | **Storyboard stills first** | A sequence = ordered, consistent **images**; no video models initially |
-| Process | Revise plan, then build | This doc is the artifact under review |
+| Build order | **Editor first** | Build the in-app node editor against MockProvider now; wire real GPU rendering after |
+| Canvas lib | **React Flow** | Mature MIT React canvas; we add node UIs + executor |
+| Local stack | **ComfyUI + Ollama** | Headless ComfyUI as GPU kernel; Ollama for local text |
 
-### The key idea: two graph levels
+### The editor is fully in-app; only the GPU kernel is external
 
-An in-app node graph does **not** mean reimplementing ComfyUI's diffusion graph.
-There are two distinct levels, and we only build the top one:
+The node **editor** — canvas, graph format, node set (including diffusion-level
+nodes), and execution engine — lives **entirely inside Mnemosyne**. The user never
+opens another tool. The single thing that cannot live inside a JS process is the
+**diffusion compute** itself (running SDXL weights on the GPU), because that needs
+a native CUDA/torch runtime.
 
-- **Domain / story graph (we build this):** high-level nodes — Campaign Style,
-  Character, Location, Scene, Events, Corrections, Prompt, LLM ops, **Render**,
-  Shot, Sequence/Storyboard, Reference. This is the canvas the DM directs.
-- **Diffusion graph (we do NOT build this):** the low-level sampler/VAE/ControlNet
-  node graph. A single **Render** node in our domain graph delegates to either a
-  ComfyUI **workflow template** (filled + submitted over its API) or a direct
-  image provider. SD internals stay where they belong.
+So the model is **in-app editor → compiled graph → GPU kernel**:
 
-This gives the node-graph UX you want while keeping the renderer pluggable and the
-build tractable. (We use a mature canvas lib — **React Flow** — for nodes/edges;
-we write the node UIs + the execution engine, not a canvas from scratch.)
+- **In-app (we build):** React Flow canvas, a typed Graph/Node/Edge model, a
+  node-type registry spanning both *domain* nodes (Character, Scene, Prompt, Shot,
+  Sequence) and *diffusion* nodes (Checkpoint, CLIP encode, KSampler, VAE,
+  ControlNet, LoRA, IP-Adapter), and an executor.
+- **GPU kernel (external process, invisible):** when the executor reaches diffusion
+  nodes it **compiles them to a ComfyUI API graph** and submits to a **headless
+  ComfyUI** running locally as a pure compute backend (no ComfyUI UI involved).
+  This kernel is swappable for an own-bundled Python/diffusers sidecar later if we
+  want zero third-party dependency.
+
+This honors "everything in-app" for the UX while acknowledging the hard constraint
+that GPU sampling needs a native runtime. We build the editor against a
+`MockProvider` first (no GPU), so the whole thing is testable in a GPU-less env.
 
 ---
 

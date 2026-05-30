@@ -25,6 +25,10 @@ next-env.d.ts
 /public/uploads/*
 !/public/uploads/.gitkeep
 
+# generated render assets (content-addressed; ephemeral)
+/public/generated/*
+!/public/generated/.gitkeep
+
 # misc
 .DS_Store
 *.pem

@@ -24,6 +24,11 @@ polished **image-generation prompts** the DM can paste into any image model.
   exclusions.
 - **Campaign memory model**: campaigns, characters, NPCs/monsters, locations, the
   current scene, a session event log, generated prompts, and canonical references.
+- **In-app node editor** (React Flow): wire `Scene → Prompt → Render → Preview` on a
+  canvas and run the graph. A typed executor routes values between nodes; the
+  Render node uses a pluggable image provider (a GPU-less `MockProvider` today,
+  a headless-ComfyUI GPU kernel later). This is Phase 3 of the architecture
+  replan — see `docs/ARCHITECTURE.md`.
 - **Character reference art**: attach canonical art to a character by uploading an
   image or pasting a URL. When present, prompts gain a *"must match the provided
   canonical reference art"* continuity note, and the URLs are carried to the AI

@@ -17,9 +17,11 @@ import EventsView from "@/components/views/EventsView";
 import PromptsView from "@/components/views/PromptsView";
 import CorrectionsView from "@/components/views/CorrectionsView";
 import ReferencesView from "@/components/views/ReferencesView";
+import GraphEditor from "@/components/graph/GraphEditor";
 
 export type ViewKey =
   | "scene"
+  | "graph"
   | "characters"
   | "locations"
   | "events"
@@ -46,6 +48,7 @@ export interface SharedProps {
 
 const NAV: { key: ViewKey; label: string }[] = [
   { key: "scene", label: "Current Scene" },
+  { key: "graph", label: "Node Editor" },
   { key: "characters", label: "Characters" },
   { key: "locations", label: "Locations" },
   { key: "events", label: "Event Log" },
@@ -148,19 +151,26 @@ export default function Workspace({ campaignId }: { campaignId: string }) {
         </div>
       </aside>
 
-      {/* Main panel */}
-      <main className="flex-1 overflow-y-auto bg-ink-950 p-8">
-        <div className="mx-auto max-w-4xl">
-          {view === "scene" && <SceneView {...shared} />}
-          {view === "characters" && <CharactersView {...shared} />}
-          {view === "locations" && <LocationsView {...shared} />}
-          {view === "events" && <EventsView {...shared} />}
-          {view === "prompts" && <PromptsView {...shared} />}
-          {view === "references" && <ReferencesView {...shared} />}
-          {view === "corrections" && <CorrectionsView {...shared} />}
-          {view === "campaign" && <CampaignView {...shared} />}
-        </div>
-      </main>
+      {/* Main panel. The node editor renders full-bleed; other views are
+          constrained to a readable column. */}
+      {view === "graph" ? (
+        <main className="flex-1 overflow-hidden bg-ink-950">
+          <GraphEditor campaignId={campaignId} scenes={core.scenes} />
+        </main>
+      ) : (
+        <main className="flex-1 overflow-y-auto bg-ink-950 p-8">
+          <div className="mx-auto max-w-4xl">
+            {view === "scene" && <SceneView {...shared} />}
+            {view === "characters" && <CharactersView {...shared} />}
+            {view === "locations" && <LocationsView {...shared} />}
+            {view === "events" && <EventsView {...shared} />}
+            {view === "prompts" && <PromptsView {...shared} />}
+            {view === "references" && <ReferencesView {...shared} />}
+            {view === "corrections" && <CorrectionsView {...shared} />}
+            {view === "campaign" && <CampaignView {...shared} />}
+          </div>
+        </main>
+      )}
     </div>
   );
 }
